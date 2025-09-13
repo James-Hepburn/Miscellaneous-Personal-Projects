@@ -13,11 +13,4 @@ public class ThreeforecastsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ThreeforecastsApplication.class, args);
     }
-
-    @Bean
-    CommandLineRunner runner (NflverseService playerService) {
-        return args -> {
-            playerService.loadPlayers ();
-        };
-    }
 }
