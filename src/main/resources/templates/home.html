@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
@@ -19,6 +19,23 @@
     </style>
 </head>
 <body>
-
+    <table>
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Team</th>
+                <th>Position</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each = "player : ${players}">
+                <td th:text = "${player.firstName}"></td>
+                <td th:text = "${player.lastName}"></td>
+                <td th:text = "${player.team}"></td>
+                <td th:text = "${player.position}"></td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>
