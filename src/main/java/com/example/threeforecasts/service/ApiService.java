@@ -14,9 +14,10 @@ public class ApiService {
     private final RestTemplate restTemplate = new RestTemplate ();
     private final String baseUrl = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/";
 
-    public Map <String, Object> getPlayerReceptions (String eventId, String regions, String markets, ) {
+    public Map <String, Object> getPlayerReceptions (String eventId) {
         String url = this.baseUrl +
-                "events/{eventId}/odds?apiKey={apiKey}&regions={regions}&markets={markets}&dateFormat={dateFormat}&oddsFormat={oddsFormat}";
+                "events/" + eventId + "/odds?apiKey=" + this.apiKey +
+                "&regions=us&markets=player_receptions&oddsFormat=american";
         return this.restTemplate.getForObject (url, Map.class);
     }
 }
