@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,5 +19,10 @@ public class ApiController {
     @GetMapping("/props/{market}")
     public Map <String, Object> getPlayerProps (@PathVariable String market) {
         return this.apiService.getPlayerProps ("aca5234c57e31b1931e51d2d0d6046f5", market);
+    }
+
+    @GetMapping("/eventIds")
+    public List <String> getAllEventIds () {
+        return this.apiService.getAllEventIds ();
     }
 }
