@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .csrf (csrf -> csrf.disable ())
                 .authorizeHttpRequests (auth -> auth
                         .requestMatchers ("/register", "/", "/login",
-                        "/props/*", "/eventIds").permitAll ()
+                        "/props/*", "/eventIds", "/allProps").permitAll ()
                         .anyRequest ().authenticated ()
                 )
                 .formLogin (form -> form
