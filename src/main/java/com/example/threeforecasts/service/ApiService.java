@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ApiService {
@@ -89,7 +86,7 @@ public class ApiService {
 
     // Parse player props data
     private List <PlayerPropOdds> parseOdds (Map <String, Object> odds, String market) {
-        List <PlayerPropOdds> parsed = new ArrayList <>();
+        Map<String, PlayerPropOdds> merged = new HashMap<>();
 
         String commenceTime = (String) odds.get ("commence_time");
         LocalDateTime eventTime = LocalDateTime.parse (commenceTime.replace ("Z", ""));
@@ -112,13 +109,26 @@ public class ApiService {
                     String overUnder = (String) outcome.get ("name");
                     Double price = ((Number) outcome.get ("price")).doubleValue ();
 
-                    Map <String, Double> oddsMap = Map.of (bookmakerName, price);
-                    parsed.add (new PlayerPropOdds (playerName, market, overUnder, oddsMap, eventTime));
+                    String key = playerName + "|" + market;
+                    PlayerPropOdds existing = merged.get(key);
+
+                    if (existing == null) {
+                        Map<String, Map<String, Double>> oddsMap = new HashMap<>();
+                        Map<String, Double> marketOdds = new HashMap<>();
+                        marketOdds.put(overUnder, price);
+                        oddsMap.put(bookmakerName, marketOdds);
+
+                        merged.put(key, new PlayerPropOdds(playerName, market, oddsMap, eventTime));
+                    } else {
+                        existing.getOddsByBookmaker()
+                                .computeIfAbsent(bookmakerName, k -> new HashMap<>())
+                                .put(overUnder, price);
+                    }
                 }
             }
         }
 
-        return parsed;
+        return new ArrayList<>(merged.values());
     }
 
     // Get all upcoming events

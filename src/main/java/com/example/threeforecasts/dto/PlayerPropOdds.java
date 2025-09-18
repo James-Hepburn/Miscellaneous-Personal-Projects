@@ -12,8 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class PlayerPropOdds {
     String playerName;
-    String propType;
     String market;
-    Map <String, Double> oddsByBookmaker;
+    Map <String, Map <String, Double>> oddsByBookmaker;
     LocalDateTime eventTime;
 }
