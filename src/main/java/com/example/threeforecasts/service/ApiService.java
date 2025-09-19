@@ -1,11 +1,14 @@
 package com.example.threeforecasts.service;
 
 import com.example.threeforecasts.dto.PlayerPropOdds;
+import com.example.threeforecasts.model.Event;
+import com.example.threeforecasts.model.PlayerProp;
 import com.example.threeforecasts.repository.EventRepository;
 import com.example.threeforecasts.repository.PlayerPropOddsRepository;
 import com.example.threeforecasts.repository.PlayerPropRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -63,6 +66,52 @@ public class ApiService {
             "player_anytime_td",
             "player_last_td"
     );
+
+    // Store data for all events
+    @Transactional
+    public void storeAllData () {
+        List <Map <String, Object>> upcomingEvents = getUpcomingEvents ();
+
+        for (Map <String, Object> apiEvent : upcomingEvents) {
+            storeData (apiEvent);
+        }
+    }
+
+    // Store data for given eventId
+    @Transactional
+    public void storeData (Map <String, Object> apiEvent) {
+        String eventId = (String) apiEvent.get ("id");
+
+        Event event = this.eventRepository.findById (eventId).orElseGet (Event::new);
+        event.setId (eventId);
+        event.setHomeTeam ((String) apiEvent.get ("home_team"));
+        event.setAwayTeam ((String) apiEvent.get ("away_team"));
+        event.setCommenceTime (LocalDateTime.parse (((String) apiEvent.get ("commence_time")). replace ("Z", "")));
+        this.eventRepository.save (event);
+
+        List <PlayerPropOdds> playerProps = getAllPlayerProps (eventId);
+
+        for (PlayerPropOdds p : playerProps) {
+            PlayerProp prop = new PlayerProp (p.getPlayerName (), null, p.getMarket (), null, p.getEventTime ());
+            prop.setEvent (event);
+
+            for (Map.Entry <String, Map <String, Double>> b : p.getOddsByBookmaker ().entrySet ()) {
+                String bookmaker = b.getKey ();
+
+                for (Map.Entry <String, Double> outcome : b.getValue ().entrySet ()) {
+                    // String propType = outcome.getKey ();
+                    Double price = outcome.getValue ();
+
+                    com.example.threeforecasts.model.PlayerPropOdds odds = new com.example.threeforecasts.model.PlayerPropOdds (bookmaker, price);
+                    odds.setPlayerProp (prop);
+
+                    prop.getOdds ().add (odds);
+                }
+            }
+
+            this.playerPropRepository.save (prop);
+        }
+    }
 
     // Get player props for a specific market
     public Map <String, Object> getPlayerProps (String eventId, String market) {

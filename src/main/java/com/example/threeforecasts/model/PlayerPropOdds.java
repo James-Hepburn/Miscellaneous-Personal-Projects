@@ -9,15 +9,18 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
+@Table(name = "player_prop_odds")
 public class PlayerPropOdds {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String bookmaker;
+
+    @Column(name = "odds")
     private Double odds;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_prop_id")
     private PlayerProp playerProp;
 

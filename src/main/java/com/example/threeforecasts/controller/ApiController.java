@@ -2,6 +2,7 @@ package com.example.threeforecasts.controller;
 
 import com.example.threeforecasts.dto.PlayerPropOdds;
 import com.example.threeforecasts.service.ApiService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,14 +18,19 @@ public class ApiController {
         this.apiService = apiService;
     }
 
-    @GetMapping("/props/{market}")
-    public Map <String, Object> getPlayerProps (@PathVariable String market) {
-        return this.apiService.getPlayerProps ("aca5234c57e31b1931e51d2d0d6046f5", market);
+    @Scheduled(fixedRate = 60 * 60 * 1000 * 24) // every day
+    public void updateAndStoreData () {
+        this.apiService.storeAllData ();
     }
 
-    @GetMapping("/allProps")
-    public List <PlayerPropOdds> getAllPlayerProps () {
-        return this.apiService.getAllPlayerProps ("aca5234c57e31b1931e51d2d0d6046f5");
+    @GetMapping("/props/{eventId}/{market}")
+    public Map <String, Object> getPlayerProps (@PathVariable String eventId, @PathVariable String market) {
+        return this.apiService.getPlayerProps (eventId, market);
+    }
+
+    @GetMapping("/allProps/{eventId}")
+    public List <PlayerPropOdds> getAllPlayerProps (@PathVariable String eventId) {
+        return this.apiService.getAllPlayerProps (eventId);
     }
 
     @GetMapping("/eventIds")

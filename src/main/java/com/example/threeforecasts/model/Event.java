@@ -12,13 +12,20 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
+@Table(name = "events")
 public class Event {
     @Id
-    private Long id;
+    private String id;
 
     private String sport;
+
+    @Column(name = "home_team")
     private String homeTeam;
+
+    @Column(name = "away_team")
     private String awayTeam;
+
+    @Column(name = "commence_time")
     private LocalDateTime commenceTime;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
