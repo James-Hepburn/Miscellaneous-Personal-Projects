@@ -25,6 +25,8 @@ public class PlayerProp {
     @Column(name = "prop_type")
     private String propType;
     private String market;
+
+    @Column(name = "line")
     private Double line;
 
     @Column(name = "event_time")

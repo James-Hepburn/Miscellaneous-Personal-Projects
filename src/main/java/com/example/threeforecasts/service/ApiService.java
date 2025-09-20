@@ -75,6 +75,8 @@ public class ApiService {
         for (Map <String, Object> apiEvent : upcomingEvents) {
             storeData (apiEvent);
         }
+
+        System.out.println ("Finished");
     }
 
     // Store data for given eventId
@@ -92,24 +94,25 @@ public class ApiService {
         List <PlayerPropOdds> playerProps = getAllPlayerProps (eventId);
 
         for (PlayerPropOdds p : playerProps) {
-            PlayerProp prop = new PlayerProp (p.getPlayerName (), null, p.getMarket (), null, p.getEventTime ());
-            prop.setEvent (event);
+            for (String propType : p.getLineByPropType ().keySet ()) {
+                PlayerProp prop = new PlayerProp (
+                        p.getPlayerName (), propType, p.getMarket (),
+                        p.getLineByPropType ().get (propType), p.getEventTime ());
+                prop.setEvent (event);
 
-            for (Map.Entry <String, Map <String, Double>> b : p.getOddsByBookmaker ().entrySet ()) {
-                String bookmaker = b.getKey ();
+                for (Map.Entry <String, Map <String, Double>> b : p.getOddsByBookmaker ().entrySet ()) {
+                    String bookmaker = b.getKey ();
+                    Map <String, Double> outcomes = b.getValue ();
 
-                for (Map.Entry <String, Double> outcome : b.getValue ().entrySet ()) {
-                    // String propType = outcome.getKey ();
-                    Double price = outcome.getValue ();
-
-                    com.example.threeforecasts.model.PlayerPropOdds odds = new com.example.threeforecasts.model.PlayerPropOdds (bookmaker, price);
-                    odds.setPlayerProp (prop);
-
-                    prop.getOdds ().add (odds);
+                    if (outcomes.containsKey (propType)) {
+                        com.example.threeforecasts.model.PlayerPropOdds odds = new com.example.threeforecasts.model.PlayerPropOdds (bookmaker, outcomes.get (propType));
+                        odds.setPlayerProp (prop);
+                        prop.getOdds ().add (odds);
+                    }
                 }
-            }
 
-            this.playerPropRepository.save (prop);
+                this.playerPropRepository.save (prop);
+            }
         }
     }
 
@@ -155,29 +158,35 @@ public class ApiService {
 
                 for (Map <String, Object> outcome : outcomes) {
                     String playerName = (String) outcome.get ("description");
-                    String overUnder = (String) outcome.get ("name");
+                    String propType = (String) outcome.get ("name");
                     Double price = ((Number) outcome.get ("price")).doubleValue ();
+                    Double line = outcome.containsKey ("point") ? ((Number) outcome.get ("point")).doubleValue () : null;
 
                     String key = playerName + "|" + market;
                     PlayerPropOdds existing = merged.get(key);
 
                     if (existing == null) {
-                        Map<String, Map<String, Double>> oddsMap = new HashMap<>();
-                        Map<String, Double> marketOdds = new HashMap<>();
-                        marketOdds.put(overUnder, price);
-                        oddsMap.put(bookmakerName, marketOdds);
+                        Map <String, Double> marketOdds = new HashMap <>();
+                        marketOdds.put (propType, price);
 
-                        merged.put(key, new PlayerPropOdds(playerName, market, oddsMap, eventTime));
+                        Map <String, Map <String, Double>> oddsMap = new HashMap <>();
+                        oddsMap.put (bookmakerName, marketOdds);
+
+                        Map <String, Double> lineByPropType = new HashMap <>();
+                        lineByPropType.put (propType, line);
+
+                        merged.put (key, new PlayerPropOdds (playerName, market, oddsMap, eventTime, lineByPropType));
                     } else {
-                        existing.getOddsByBookmaker()
-                                .computeIfAbsent(bookmakerName, k -> new HashMap<>())
-                                .put(overUnder, price);
+                        existing.getOddsByBookmaker ()
+                                .computeIfAbsent (bookmakerName, k -> new HashMap <>())
+                                .put (propType, price);
+                        existing.getLineByPropType ().put (propType, line);
                     }
                 }
             }
         }
 
-        return new ArrayList<>(merged.values());
+        return new ArrayList <>(merged.values ());
     }
 
     // Get all upcoming events

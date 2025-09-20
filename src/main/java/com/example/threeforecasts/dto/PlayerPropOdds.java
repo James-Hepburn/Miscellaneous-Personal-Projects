@@ -15,4 +15,5 @@ public class PlayerPropOdds {
     String market;
     Map <String, Map <String, Double>> oddsByBookmaker;
     LocalDateTime eventTime;
+    Map <String, Double> lineByPropType;
 }
