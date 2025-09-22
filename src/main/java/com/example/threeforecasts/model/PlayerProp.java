@@ -24,6 +24,8 @@ public class PlayerProp {
 
     @Column(name = "prop_type")
     private String propType;
+
+    @Column(name = "market")
     private String market;
 
     @Column(name = "line")

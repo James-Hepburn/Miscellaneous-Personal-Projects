@@ -11,9 +11,9 @@ import java.util.Map;
 @Setter
 @AllArgsConstructor
 public class PlayerPropOdds {
-    String playerName;
-    String market;
-    Map <String, Map <String, Double>> oddsByBookmaker;
-    LocalDateTime eventTime;
-    Map <String, Double> lineByPropType;
+    private String playerName;
+    private String market;
+    private Map <String, Map <String, Double>> oddsByBookmaker;
+    private LocalDateTime eventTime;
+    private Map <String, Double> lineByPropType;
 }

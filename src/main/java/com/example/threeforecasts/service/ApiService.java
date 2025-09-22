@@ -14,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class ApiService {
     @Value("${api.key}")
@@ -25,6 +28,8 @@ public class ApiService {
     private final EventRepository eventRepository;
     private final PlayerPropRepository playerPropRepository;
     private final PlayerPropOddsRepository playerPropOddsRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(ApiService.class);
 
     public ApiService (EventRepository eventRepository, PlayerPropRepository playerPropRepository, PlayerPropOddsRepository playerPropOddsRepository) {
         this.eventRepository = eventRepository;
@@ -89,7 +94,7 @@ public class ApiService {
         event.setHomeTeam ((String) apiEvent.get ("home_team"));
         event.setAwayTeam ((String) apiEvent.get ("away_team"));
         event.setCommenceTime (LocalDateTime.parse (((String) apiEvent.get ("commence_time")). replace ("Z", "")));
-        this.eventRepository.save (event);
+        this.eventRepository.saveAndFlush (event);
 
         List <PlayerPropOdds> playerProps = getAllPlayerProps (eventId);
 
@@ -111,7 +116,7 @@ public class ApiService {
                     }
                 }
 
-                this.playerPropRepository.save (prop);
+                this.playerPropRepository.saveAndFlush (prop);
             }
         }
     }
